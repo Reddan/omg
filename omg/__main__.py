@@ -67,6 +67,15 @@ def is_local_module(module):
     non_local_modules.add(module)
   return is_local
 
+def get_local_modname_by_path():
+  result = {
+    to_module_path(module): mod_name
+    for mod_name, module in list(sys.modules.items())
+    if is_local_module(module)
+  }
+  result[module_path.absolute()] = module_path_str
+  return result
+
 def start():
   try:
     try:
@@ -86,19 +95,10 @@ def start():
 
 def restart(changed_file):
   print(f'⚠️  {changed_file.relative_to(cwd)} changed, restarting.')
-  for mod_name in local_modname_by_path.values():
+  for mod_name in get_local_modname_by_path().values():
     if mod_name in sys.modules:
       del sys.modules[mod_name]
   start()
-
-def get_local_modname_by_path():
-  result = {
-    to_module_path(module): mod_name
-    for mod_name, module in list(sys.modules.items())
-    if is_local_module(module)
-  }
-  result[module_path.absolute()] = module_path_str
-  return result
 
 def receive_signal(signum, stack):
   raise RestartException()
@@ -108,11 +108,11 @@ class EventHandler(PatternMatchingEventHandler):
     src_path = Path(evt.src_path)
     dest_path = Path(evt.dest_path) if hasattr(evt, 'dest_path') else None
     local_modname_by_path = get_local_modname_by_path()
-    is_active = src_path in local_modname_by_path or dest_path in local_modname_by_path
-    if is_active:
+    if src_path in local_modname_by_path:
       changed_modules.add(src_path)
-      if dest_path:
-        changed_modules.add(dest_path)
+    if dest_path in local_modname_by_path:
+      changed_modules.add(dest_path)
+    if len(changed_modules):
       os.kill(os.getpid(), signal.SIGUSR1)
 
 signal.signal(signal.SIGUSR1, receive_signal)
@@ -122,15 +122,13 @@ observer.schedule(EventHandler(patterns=['*.py']), str(cwd), recursive=True)
 observer.start()
 
 start()
-local_modname_by_path = get_local_modname_by_path()
 
 while True:
   try:
-    for mod_path in changed_modules:
+    mod_path = next(iter(changed_modules), None)
+    if mod_path:
       changed_modules = set()
       restart(mod_path)
-      local_modname_by_path = get_local_modname_by_path()
-      break
     time.sleep(0.05)
   except RestartException:
     pass
