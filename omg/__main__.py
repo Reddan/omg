@@ -107,9 +107,9 @@ class EventHandler(PatternMatchingEventHandler):
     if dest_path in local_modname_by_path:
       changed_modules.add(dest_path)
     if len(changed_modules):
-      os.kill(os.getpid(), signal.SIGUSR1)
+      os.kill(os.getpid(), signal.SIGTERM)
 
-signal.signal(signal.SIGUSR1, receive_signal)
+signal.signal(signal.SIGTERM, receive_signal)
 
 observer = Observer()
 observer.schedule(EventHandler(patterns=['*.py']), str(cwd), recursive=True)
