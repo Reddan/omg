@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
   name='omg',
   packages=['omg'],
-  version='1.0.2',
+  version='1.0.3',
   author='Hampus Hallman',
   author_email='me@hampushallman.com',
   url='https://github.com/Reddan/omg',
