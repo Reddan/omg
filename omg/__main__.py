@@ -1,51 +1,45 @@
+import os
 import sys
 import importlib
 import time
 import traceback
+import signal
+import re
 from pathlib import Path
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 from termcolor import colored
-import signal
-import re
-from io import StringIO
-import os
-
-sys.path.insert(0, '.')
 
 cwd = Path.cwd()
 module_path = Path(sys.argv[1])
-module_path_str = str(module_path)[:-3].replace('/', '.')
+module_path_str = str(module_path)[:-3].replace('/', '.').replace('\\', '.')
 non_local_modules = set()
 changed_modules = set()
+
+sys.path.insert(0, '.')
+sys.argv = sys.argv[1:]
 
 class RestartException(Exception):
   pass
 
 def print_current_traceback():
-  exception_output = StringIO()
-  traceback.print_exc(file=exception_output)
-  stack_trace = exception_output.getvalue().splitlines()
-  stack_trace.pop(0)
-  error = stack_trace.pop()
-
-  lines = list(enumerate(stack_trace))
-  filter_line = lambda line: 'frozen importlib._bootstrap' in line[1]
-  start_i = next(line for line in lines if filter_line(line))[0]
-  start_i = next(line for line in lines[start_i:] if not filter_line(line))[0]
-  lines = [l[1].strip() for l in lines[start_i:]]
+  stack_trace = traceback.format_exc().splitlines()
+  _, *lines, error = stack_trace
+  filter_line = lambda line: 'frozen importlib._bootstrap' in line
+  start_i = next(i + 1 for i in range(len(lines)) if filter_line(lines[i]) and not filter_line(lines[i + 1]))
+  lines = lines[start_i:]
 
   for line in lines:
-    matches = re.match('File "(.*)", line (\d+), in (.+)', line)
+    matches = re.match('File "(.*)", line (\d+), in (.+)', line.strip())
     if matches:
       path, line_number, method = matches.groups()
-    else:
       print(
         f"{colored(path, 'cyan')}"
         f":{colored(line_number, 'yellow')} "
         f"{colored(method, 'green')}: "
-        f"{line}"
       )
+    else:
+      print(line)
   print(colored(error, 'red'))
   print('')
 
