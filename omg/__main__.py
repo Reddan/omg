@@ -13,7 +13,7 @@ from termcolor import colored
 cwd = Path.cwd()
 module_path = Path(sys.argv[1])
 module_path_str = str(module_path)[:-3].replace('/', '.').replace('\\', '.')
-non_local_modules = set()
+is_local_by_module = {}
 changed_modules = set()
 
 sys.path.insert(0, '.')
@@ -26,7 +26,7 @@ def print_current_traceback():
   stack_trace = traceback.format_exc().splitlines()
   _, *lines, error = stack_trace
   filter_line = lambda line: 'frozen importlib._bootstrap' in line
-  start_i = next(i + 1 for i in range(len(lines)) if filter_line(lines[i]) and not filter_line(lines[i + 1]))
+  start_i = next(i + 1 for i in range(len(lines)) if filter_line(lines[i]) and not filter_line(lines[i + 1]), 0)
   lines = lines[start_i:]
 
   for line in lines:
@@ -47,19 +47,15 @@ def to_module_path(module):
   try:
     return Path(module.__file__).absolute()
   except:
-    return Path('/')
+    return Path('/___')
 
 def is_local_module(module):
-  if module in non_local_modules:
-    return False
-  try:
-    target = to_module_path(module)
-    is_local = cwd in target.parents
-  except AttributeError:
-    is_local = False
-  if not is_local:
-    non_local_modules.add(module)
-  return is_local
+  if module in is_local_by_module:
+    return is_local_by_module[module]
+  target = to_module_path(module)
+  is_local = cwd in target.parents
+  is_local_by_module[module] = is_local
+  return is_local_module(module)
 
 def get_local_modname_by_path():
   result = {
