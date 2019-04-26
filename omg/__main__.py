@@ -25,23 +25,24 @@ class RestartException(Exception):
 def print_current_traceback():
   stack_trace = traceback.format_exc().splitlines()
   _, *lines, error = stack_trace
-  filter_line = lambda line: 'frozen importlib._bootstrap' in line
-  start_i = next(i + 1 for i in range(len(lines)) if filter_line(lines[i]) and not filter_line(lines[i + 1]), 0)
+  filtered_lines = ['frozen importlib._bootstrap' in line for line in lines]
+  start_i = next((i + 1 for i in range(len(filtered_lines) - 1) if filtered_lines[i] and not filtered_lines[i + 1]), 0)
   lines = lines[start_i:]
 
-  for line in lines:
+  def handle_line(line):
     matches = re.match('File "(.*)", line (\d+), in (.+)', line.strip())
     if matches:
       path, line_number, method = matches.groups()
-      print(
+      return (
         f"{colored(path, 'cyan')}"
         f":{colored(line_number, 'yellow')} "
         f"{colored(method, 'green')}: "
       )
     else:
-      print(line)
-  print(colored(error, 'red'))
-  print('')
+      return line
+
+  lines = [''] + [handle_line(line) for line in lines] + [colored(error, 'red'), '']
+  print('\n'.join(lines), file=sys.stderr)
 
 def to_module_path(module):
   try:
