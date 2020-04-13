@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
   name='omg',
   packages=['omg'],
-  version='1.0.5',
+  version='1.1.0',
   author='Hampus Hallman',
   author_email='me@hampushallman.com',
   url='https://github.com/Reddan/omg',
@@ -14,6 +14,7 @@ setup(
   install_requires=[
     'watchdog',
     'termcolor',
+    'riprint'
   ],
   python_requires='~=3.6',
 )

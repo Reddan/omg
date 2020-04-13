@@ -9,6 +9,9 @@ from pathlib import Path
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 from termcolor import colored
+from riprint import riprint
+
+__builtins__['print'] = riprint
 
 cwd = Path.cwd()
 module_path = Path(sys.argv[1])
