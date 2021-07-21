@@ -2,14 +2,12 @@ import os
 import sys
 import importlib
 import time
-import traceback
 import signal
-import re
 from pathlib import Path
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
-from termcolor import colored
 from riprint import riprint
+from .pretty_print_exc import pretty_print_exc
 
 __builtins__['print'] = riprint
 
@@ -24,28 +22,6 @@ sys.argv = sys.argv[1:]
 
 class RestartException(Exception):
   pass
-
-def print_current_traceback():
-  stack_trace = traceback.format_exc().splitlines()
-  _, *lines, error = stack_trace
-  filtered_lines = ['frozen importlib._bootstrap' in line for line in lines]
-  start_i = next((i + 1 for i in range(len(filtered_lines) - 1) if filtered_lines[i] and not filtered_lines[i + 1]), 0)
-  lines = lines[start_i:]
-
-  def handle_line(line):
-    matches = re.match('File "(.*)", line (\d+), in (.+)', line.strip())
-    if matches:
-      path, line_number, method = matches.groups()
-      return (
-        f"{colored(path, 'cyan')}"
-        f":{colored(line_number, 'yellow')} "
-        f"{colored(method, 'green')}: "
-      )
-    else:
-      return line
-
-  lines = [''] + [handle_line(line) for line in lines] + [colored(error, 'red'), '']
-  print('\n'.join(lines), file=sys.stderr)
 
 def to_module_path(module):
   try:
@@ -85,7 +61,7 @@ def start():
   except (SystemExit, RestartException):
     pass
   except:
-    print_current_traceback()
+    pretty_print_exc()
 
 def restart(changed_file):
   print(f'⚠️  {changed_file.relative_to(cwd)} changed, restarting.')
