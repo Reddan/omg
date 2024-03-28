@@ -24,16 +24,13 @@ class RestartException(Exception):
   pass
 
 def to_module_path(module):
-  try:
-    return Path(module.__file__).absolute()
-  except:
-    return Path('/___')
+  return Path(getattr(module, "__file__", None) or "/__").resolve()
 
 def is_local_module(module):
   if module in is_local_by_module:
     return is_local_by_module[module]
   target = to_module_path(module)
-  is_local = cwd in target.parents
+  is_local = ".venv" not in target.parts and cwd in target.parents
   is_local_by_module[module] = is_local
   return is_local_module(module)
 
@@ -43,7 +40,7 @@ def get_local_modname_by_path():
     for mod_name, module in list(sys.modules.items())
     if is_local_module(module)
   }
-  result[module_path.absolute()] = module_path_str
+  result[module_path.resolve()] = module_path_str
   return result
 
 def start():
