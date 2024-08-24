@@ -1,5 +1,3 @@
-*.pyc
-omg.egg-info/
-/dist
-/build
+__pycache__/
+/dist/
 .DS_Store
