@@ -71,7 +71,7 @@ def receive_signal(signum, stack):
   raise RestartException()
 
 class EventHandler(PatternMatchingEventHandler):
-  def on_any_event(self, evt):
+  def on_modified(self, evt):
     src_path = Path(evt.src_path)
     dest_path = Path(evt.dest_path) if hasattr(evt, 'dest_path') else None
     local_modname_by_path = get_local_modname_by_path()
