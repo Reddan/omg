@@ -61,6 +61,7 @@ def start():
     pretty_print_exc()
 
 def restart(changed_file):
+  os.system("cls" if os.name == "nt" else "clear")
   print(f'⚠️  {changed_file.relative_to(cwd)} changed, restarting.')
   for mod_name in get_local_modname_by_path().values():
     if mod_name in sys.modules:
@@ -79,7 +80,7 @@ class EventHandler(PatternMatchingEventHandler):
       changed_modules.add(src_path)
     if dest_path in local_modname_by_path:
       changed_modules.add(dest_path)
-    if len(changed_modules):
+    if len(changed_modules) and os.name != "nt":
       os.kill(os.getpid(), signal.SIGTERM)
 
 signal.signal(signal.SIGTERM, receive_signal)
