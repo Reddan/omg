@@ -31,11 +31,11 @@ def pretty_print_exc():
         path = path.replace(cwd, ".")
       color_attrs: list[Attribute] = ["dark"] * is_external
       pretty_line = (
-        f"{colored(path, 'cyan', attrs=color_attrs)}"
-        f"{colored(':', attrs=color_attrs)}"
-        f"{colored(line_number, 'yellow', attrs=color_attrs)} "
-        f"{colored(method, 'green', attrs=color_attrs)}"
-        f"{colored(':', attrs=color_attrs)}"
+        f"{colored(path, "cyan", attrs=color_attrs)}"
+        f"{colored(":", attrs=color_attrs)}"
+        f"{colored(line_number, "yellow", attrs=color_attrs)} "
+        f"{colored(method, "green", attrs=color_attrs)}"
+        f"{colored(":", attrs=color_attrs)}"
       )
       pretty_lines.append(pretty_line)
 
