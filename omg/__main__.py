@@ -1,26 +1,25 @@
-import os
-import sys
 import importlib
-import time
+import os
 import signal
+import sys
+import time
 from pathlib import Path
-from watchdog.observers import Observer
-from watchdog.events import PatternMatchingEventHandler
 from riprint import riprint
+from watchdog.events import PatternMatchingEventHandler
+from watchdog.observers import Observer
+from . import reload_handlers
 from .pretty_print_exc import pretty_print_exc
-
-__builtins__["print"] = riprint
 
 cwd = Path.cwd().resolve()
 module_path = Path(sys.argv[1])
 module_path_str = str(module_path.with_suffix("")).replace("/", ".").replace("\\", ".")
 is_local_by_module = {}
 changed_modules = set()
+start_time = 0
 
+__builtins__["print"] = riprint
 sys.path.insert(0, ".")
 sys.argv = sys.argv[1:]
-
-start_time = 0
 
 def stopwatch():
   global start_time
@@ -58,6 +57,7 @@ def get_local_modname_by_path():
 def start():
   global start_time
   start_time = time.time()
+  reload_handlers.clear()
   try:
     try:
       importlib.import_module(module_path_str)
@@ -79,6 +79,8 @@ def start():
 def restart(changed_file):
   os.system("cls" if os.name == "nt" else "clear")
   print(f"⚠️  {changed_file.relative_to(cwd)} changed, restarting. {stopwatch()}")
+  for handler in reload_handlers:
+    handler()
   for mod_name in get_local_modname_by_path().values():
     if mod_name in sys.modules:
       del sys.modules[mod_name]
