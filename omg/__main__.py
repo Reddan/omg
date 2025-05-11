@@ -11,9 +11,9 @@ from .pretty_print_exc import pretty_print_exc
 
 __builtins__["print"] = riprint
 
-cwd = Path.cwd()
+cwd = Path.cwd().resolve()
 module_path = Path(sys.argv[1])
-module_path_str = str(module_path)[:-3].replace("/", ".").replace("\\", ".")
+module_path_str = str(module_path.with_suffix("")).replace("/", ".").replace("\\", ".")
 is_local_by_module = {}
 changed_modules = set()
 
@@ -89,8 +89,8 @@ def receive_signal(signum, stack):
 
 class EventHandler(PatternMatchingEventHandler):
   def on_modified(self, evt):
-    src_path = Path(evt.src_path)
-    dest_path = Path(evt.dest_path) if hasattr(evt, "dest_path") else None
+    src_path = Path(evt.src_path).resolve()
+    dest_path = Path(evt.dest_path).resolve() if hasattr(evt, "dest_path") else None
     local_modname_by_path = get_local_modname_by_path()
     if src_path in local_modname_by_path:
       changed_modules.add(src_path)
