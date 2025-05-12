@@ -7,8 +7,7 @@ from pathlib import Path
 from riprint import riprint
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
-from . import reload_handlers
-from .pretty_print_exc import pretty_print_exc
+from . import pretty_print_exc, reload_handlers
 
 cwd = Path.cwd().resolve()
 module_path = Path(sys.argv[1])
@@ -57,7 +56,6 @@ def get_local_modname_by_path():
 def start():
   global start_time
   start_time = time.time()
-  reload_handlers.clear()
   try:
     try:
       importlib.import_module(module_path_str)
@@ -81,6 +79,7 @@ def restart(changed_file):
   print(f"⚠️  {changed_file.relative_to(cwd)} changed, restarting. {stopwatch()}")
   for handler in reload_handlers:
     handler()
+  reload_handlers.clear()
   for mod_name in get_local_modname_by_path().values():
     if mod_name in sys.modules:
       del sys.modules[mod_name]
