@@ -53,5 +53,4 @@ It plays well with `omg` and saves you from recomputing your sins.
 
 ---
 
-It grinds. You code. It reloads your mistakes with incredible speed.\
-It doesn't fix them. 💀
+It grinds. You code. It reloads your mistakes with incredible speed - but it sure as hell doesn't fix them. 💀

@@ -2,8 +2,7 @@ import re
 import sys
 import traceback
 from pathlib import Path
-from typing import Any
-from termcolor import colored
+from .colored import Attribute, colored
 
 path_pattern = re.compile(r'File "(.*)", line (\d+), in (.+)')
 error_pattern = re.compile(r"^[\w.]+: ")
@@ -29,13 +28,13 @@ def pretty_print_exc():
       is_external = (not path.startswith(".") and not path.startswith(cwd)) or ".venv" in path
       if not is_external:
         path = path.replace(cwd, ".")
-      color_attrs: list[Any] = ["dark"] * is_external
+      color_attrs: list[Attribute] = ["dark"] * is_external
       pretty_line = (
-        f"{colored(path, "cyan", attrs=color_attrs)}"
-        f"{colored(":", attrs=color_attrs)}"
-        f"{colored(line_number, "yellow", attrs=color_attrs)} "
-        f"{colored(method, "green", attrs=color_attrs)}"
-        f"{colored(":", attrs=color_attrs)}"
+        f'{colored(path, "cyan", attrs=color_attrs)}'
+        f'{colored(":", attrs=color_attrs)}'
+        f'{colored(line_number, "yellow", attrs=color_attrs)} '
+        f'{colored(method, "green", attrs=color_attrs)}'
+        f'{colored(":", attrs=color_attrs)}'
       )
       pretty_lines.append(pretty_line)
 

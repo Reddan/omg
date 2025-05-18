@@ -1,11 +1,9 @@
 [project]
 name = "omg"
-version = "1.3.3"
+version = "1.3.4"
 requires-python = ">=3.10"
 dependencies = [
   "watchdog",
-  "termcolor",
-  "riprint",
 ]
 authors = [
   {name = "Hampus Hallman"}
@@ -22,6 +20,11 @@ classifiers = [
 
 [project.urls]
 Repository = "https://github.com/Reddan/omg.git"
+
+[dependency-groups]
+dev = [
+    "numpy>=2.2.5",
+]
 
 [build-system]
 requires = ["hatchling"]

@@ -4,10 +4,9 @@ import signal
 import sys
 import time
 from pathlib import Path
-from riprint import riprint
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
-from . import pretty_print_exc, reload_handlers
+from . import pretty_print_exc, print, reload_handlers
 
 cwd = Path.cwd().resolve()
 module_path = Path(sys.argv[1])
@@ -16,7 +15,7 @@ is_local_by_module = {}
 changed_modules = set()
 start_time = 0
 
-__builtins__["print"] = riprint
+__builtins__["print"] = print
 sys.path.insert(0, ".")
 sys.argv = sys.argv[1:]
 
