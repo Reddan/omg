@@ -1,3 +1,4 @@
+import builtins
 import importlib
 import os
 import signal
@@ -14,8 +15,9 @@ module_path_str = str(module_path.with_suffix("")).replace("/", ".").replace("\\
 is_local_by_module = {}
 changed_modules = set()
 start_time = 0
+historic_local_modname_by_path: dict[Path, str] = {}
 
-__builtins__["print"] = print
+builtins.__dict__["print"] = print
 sys.path.insert(0, ".")
 sys.argv = sys.argv[1:]
 
@@ -43,7 +45,7 @@ def is_local_module(module):
   is_local_by_module[module] = is_local
   return is_local_module(module)
 
-def get_local_modname_by_path():
+def get_local_modname_by_path() -> dict[Path, str]:
   result = {
     to_module_path(module): mod_name
     for mod_name, module in list(sys.modules.items())
@@ -58,6 +60,7 @@ def start():
   try:
     try:
       importlib.import_module(module_path_str)
+      historic_local_modname_by_path.clear()
       print(f"⚠️  {module_path} finished. {stopwatch()}")
     except OSError as err:
       if str(err) == "could not get source code":
@@ -76,12 +79,13 @@ def start():
 def restart(changed_file):
   os.system("cls" if os.name == "nt" else "clear")
   print(f"⚠️  {changed_file.relative_to(cwd)} changed, restarting. {stopwatch()}")
+  local_modname_by_path = get_local_modname_by_path()
+  historic_local_modname_by_path.update(local_modname_by_path)
   for handler in reload_handlers:
     handler()
   reload_handlers.clear()
-  for mod_name in get_local_modname_by_path().values():
-    if mod_name in sys.modules:
-      del sys.modules[mod_name]
+  for mod_name in local_modname_by_path.values():
+    sys.modules.pop(mod_name, None)
   start()
 
 def receive_signal(signum, stack):
@@ -91,7 +95,7 @@ class EventHandler(PatternMatchingEventHandler):
   def on_modified(self, evt):
     src_path = Path(evt.src_path).resolve()
     dest_path = Path(evt.dest_path).resolve() if hasattr(evt, "dest_path") else None
-    local_modname_by_path = get_local_modname_by_path()
+    local_modname_by_path = {**historic_local_modname_by_path, **get_local_modname_by_path()}
     if src_path in local_modname_by_path:
       changed_modules.add(src_path)
     if dest_path in local_modname_by_path:
