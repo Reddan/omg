@@ -109,19 +109,16 @@ observer = Observer()
 observer.schedule(EventHandler(patterns=["*.py"]), str(cwd), recursive=True)
 observer.start()
 
-start()
-
-while True:
-  try:
-    mod_path = next(iter(changed_modules), None)
-    if mod_path:
-      changed_modules.clear()
-      restart(mod_path)
-    time.sleep(0.05)
-  except RestartException:
-    pass
-  except KeyboardInterrupt:
-    break
-
 def main():
-  pass
+  start()
+  while True:
+    try:
+      mod_path = next(iter(changed_modules), None)
+      if mod_path:
+        changed_modules.clear()
+        restart(mod_path)
+      time.sleep(0.05)
+    except RestartException:
+      pass
+    except KeyboardInterrupt:
+      break

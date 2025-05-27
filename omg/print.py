@@ -1,4 +1,3 @@
-import builtins
 import shutil
 from collections.abc import ItemsView, KeysView, ValuesView
 from contextlib import suppress
@@ -28,7 +27,7 @@ def render(value, color, indent=0):
   match value:
     case None:
       return colored(str(value), color, attrs=["bold"])
-    case builtins.Ellipsis:
+    case _ if value is ...:
       return colored("...", color, attrs=["bold"])
     case int() | float():
       return colored(str(value), color or "yellow")
