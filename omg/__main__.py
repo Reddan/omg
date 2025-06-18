@@ -35,14 +35,19 @@ class RestartException(Exception):
   pass
 
 def to_module_path(module):
-  return Path(getattr(module, "__file__", None) or "/__").resolve()
+  file = getattr(module, "__file__", None)
+  if not file:
+    ns_path = getattr(getattr(module, "__path__", None), "_path", ())
+    file = next(iter(ns_path), None)
+  return Path(file or "/__").resolve()
 
 def is_local_module(module):
-  if module in is_local_by_module:
-    return is_local_by_module[module]
+  modname = module.__name__
+  if modname in is_local_by_module:
+    return is_local_by_module[modname]
   target = to_module_path(module)
   is_local = ".venv" not in target.parts and cwd in target.parents
-  is_local_by_module[module] = is_local
+  is_local_by_module[modname] = is_local
   return is_local_module(module)
 
 def get_local_modname_by_path() -> dict[Path, str]:
