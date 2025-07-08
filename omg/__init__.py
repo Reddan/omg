@@ -7,5 +7,7 @@ __all__ = ["colored", "on_reload", "pretty_print_exc", "print"]
 
 reload_handlers: list[Callable] = []
 
+IS_OMG = False
+
 def on_reload(func: Callable):
   reload_handlers.append(func)

@@ -4,10 +4,10 @@ import os
 import signal
 import sys
 import time
+import omg
 from pathlib import Path
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
-from . import pretty_print_exc, print, reload_handlers
 
 cwd = Path.cwd().resolve()
 module_path = Path(sys.argv[1])
@@ -17,7 +17,8 @@ changed_modules = set()
 start_time = 0
 historic_local_modname_by_path: dict[Path, str] = {}
 
-builtins.__dict__["print"] = print
+omg.IS_OMG = True
+builtins.__dict__["print"] = omg.print
 sys.path.insert(0, ".")
 sys.argv = sys.argv[1:]
 
@@ -79,16 +80,16 @@ def start():
   except RestartException:
     pass
   except:
-    pretty_print_exc()
+    omg.pretty_print_exc()
 
 def restart(changed_file):
   os.system("cls" if os.name == "nt" else "clear")
   print(f"⚠️  {changed_file.relative_to(cwd)} changed, restarting. {stopwatch()}")
   local_modname_by_path = get_local_modname_by_path()
   historic_local_modname_by_path.update(local_modname_by_path)
-  for handler in reload_handlers:
+  for handler in omg.reload_handlers:
     handler()
-  reload_handlers.clear()
+  omg.reload_handlers.clear()
   for mod_name in local_modname_by_path.values():
     sys.modules.pop(mod_name, None)
   start()
