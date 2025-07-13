@@ -1,6 +1,19 @@
 version = 1
 revision = 1
 requires-python = ">=3.10"
+resolution-markers = [
+    "python_full_version >= '3.11'",
+    "python_full_version < '3.11'",
+]
+
+[[package]]
+name = "checkpointer"
+version = "2.14.4"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/7a/21/89c3839e199e2b097957c9c961690f18c78fb8479f962fbdc374b59e61a0/checkpointer-2.14.4.tar.gz", hash = "sha256:68f4f6a728e15abd2609f98f11d2a61fdaaba375360f23215b9f45d1c841020d", size = 39305 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b8/fa/c419e6945022aab1551bc4335fddd4f312591656ef4bcb14e30e6d49986e/checkpointer-2.14.4-py3-none-any.whl", hash = "sha256:ea4f69ab986a92fa0f664e7820ced54008f2b94f3abe64a349c08b346a0e53af", size = 22996 },
+]
 
 [[package]]
 name = "numpy"
@@ -66,7 +79,7 @@ wheels = [
 
 [[package]]
 name = "omg"
-version = "1.3.8"
+version = "1.3.9"
 source = { editable = "." }
 dependencies = [
     { name = "watchdog" },
@@ -74,6 +87,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "checkpointer", marker = "python_full_version >= '3.11'" },
     { name = "numpy" },
 ]
 
@@ -81,7 +95,10 @@ dev = [
 requires-dist = [{ name = "watchdog" }]
 
 [package.metadata.requires-dev]
-dev = [{ name = "numpy", specifier = ">=2.2.5" }]
+dev = [
+    { name = "checkpointer", marker = "python_full_version >= '3.11'", specifier = ">=2.14.4" },
+    { name = "numpy", specifier = ">=2.2.5" },
+]
 
 [[package]]
 name = "watchdog"

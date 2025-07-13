@@ -9,6 +9,11 @@ from pathlib import Path
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
 
+try:
+  from checkpointer import cleanup_memory_storage
+except:
+  cleanup_memory_storage = lambda: None
+
 cwd = Path.cwd().resolve()
 module_path = Path(sys.argv[1])
 module_path_str = str(module_path.with_suffix("")).replace("/", ".").replace("\\", ".")
@@ -68,6 +73,7 @@ def start():
       importlib.import_module(module_path_str)
       historic_local_modname_by_path.clear()
       print(f"⚠️  {module_path} finished. {stopwatch()}")
+      cleanup_memory_storage()
     except OSError as err:
       if str(err) == "could not get source code":
         start()
